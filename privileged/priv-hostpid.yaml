@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: privileged-hostpid
 spec:
-  hostPid: true
+  hostPID: true
   securityContext:
     seccompProfile:
       type: Unconfined
