@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cap-sys-module
+spec:
+  securityContext:
+    seccompProfile:
+      type: Unconfined
+    appArmorProfile:
+        type: Unconfined
+  containers:
+    - name: app
+      image: paraddise/ubuntu:20.04
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+        appArmorProfile:
+          type: Unconfined
+        capabilities:
+          add: ["SYS_MODULE"]
+      command: [ "/bin/sh", "-c", "--" ]
+      args: [ "while true; do sleep 30; done;" ]

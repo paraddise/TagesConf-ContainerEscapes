@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    ports:
+      - containerPort: 80
+        hostPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-client
+spec:
+  containers:
+  - name: app
+    image: nginx:alpine
+    command: [ "/bin/sh", "-c", "--" ]
+    args: [ "while true; do curl -H 'Authorization: Bearer SOME_TOKEN' http://nginx:80/; sleep 20; done;" ]

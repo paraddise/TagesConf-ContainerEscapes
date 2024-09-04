@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cap-dac-read-search
+spec:
+  securityContext:
+    seccompProfile:
+      type: Unconfined
+    appArmorProfile:
+      type: Unconfined
+  containers:
+  - name: app
+    image: paraddise/ubuntu
+    securityContext:
+      seccompProfile:
+        type: Unconfined
+      appArmorProfile:
+        type: Unconfined
+      capabilities:
+        add: ["DAC_READ_SEARCH"]
+    command: [ "/bin/sh", "-c", "--" ]
+    args: [ "while true; do sleep 30; done;" ]
