@@ -205,7 +205,7 @@ References:
   - [Article: Docker breakout exploit analysis](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
 
 
-## CAP\_DAC\_READ\_SEARCH + CAP\_DAC\_READ\_SEARCH
+## CAP\_DAC\_OVERRIDE + CAP\_DAC\_READ\_SEARCH
 
 Same as above, but you can write to any file now. Just overwrite `authorized_keys` file.
 ```shell
